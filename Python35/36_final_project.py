@@ -1,4 +1,4 @@
-print('hello world')
+print(5 + 2)
 
 # Вариант 1 — Telegram бот "Тамагочи"
 # Описание проекта:

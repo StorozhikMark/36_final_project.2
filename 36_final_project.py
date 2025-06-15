@@ -1,51 +1,63 @@
 import telebot
-from telebot import types
 
-bot = telebot.TeleBot('7747821587:AAFVyH1JFPuC8e7lpBqBy-z5MyqSKHMLe_Y')
+API_TOKEN = open('token.txt').readline()
 
-hunger = 0
-mood = 100
-health = 100
+bot = telebot.TeleBot(API_TOKEN)
+
+status = open('Состояние.txt').readlines()
+status = [int(status[0]), int(status[1]), int(status[2])]
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    global hunger, mood, health
+    global status
     bot.send_message(message.chat.id, 'Привет! Я бот "Тамагочи". У тебя есть питомец. Ты можешь посмотреть его состояние, если наберёшь команду /status. Ты можешь покормить питомца, поиграть с ним и вылечить с помощью команд /feed, /play, /heal')
-    hunger += 1
-    mood -= 1
-    health -= 1
+    status[0] += 1
+    status[1] -= 1
+    status[2] -= 1
+    with open('Состояние.txt', 'w') as file:
+        file.write(f'{status[0]}\n{status[1]}\n{status[2]}')
 
 @bot.message_handler(commands=['status'])
-def status(message):
-    global hunger, mood, health
-    bot.send_message(message.chat.id, f'Голод - {hunger}\nНастроение - {mood}\nЗдоровье - {health}')
-    hunger += 1
-    mood -= 1
-    health -= 1
+def send_status(message):
+    global status
+    bot.send_message(message.chat.id, f'Голод - {status[0]}\nНастроение - {status[1]}\nЗдоровье - {status[2]}')
+    status[0] += 1
+    status[1] -= 1
+    status[2] -= 1
+    with open('Состояние.txt', 'w') as file:
+        file.write(f'{status[0]}\n{status[1]}\n{status[2]}' )
 
 @bot.message_handler(commands=['feed'])
 def feed(message):
-    global hunger, mood, health
-    hunger = 0
-    bot.send_message(message.chat.id, f'Вы покормили питомца! Голод - {hunger}')
-    mood -= 1
-    health -= 1
+    global status
+    status[0] = 0
+    bot.send_message(message.chat.id, f'Вы покормили питомца! Голод - {status[0]}')
+    status[1] -= 1
+    status[2] -= 1
+    with open('Состояние.txt', 'w') as file:
+        file.write(f'{status[0]}\n{status[1]}\n{status[2]}')
 
 @bot.message_handler(commands=['play'])
 def play(message):
-    global hunger, mood, health
-    mood = 100
-    bot.send_message(message.chat.id, f'Вы поиграли с питомцем! Настроение - {mood}')
-    hunger += 1
-    health -= 1
+    global status
+    status[1] = 100
+    bot.send_message(message.chat.id, f'Вы поиграли с питомцем! Настроение - {status[1]}')
+    status[0] += 1
+    status[2] -= 1
+    with open('Состояние.txt', 'w') as file:
+        file.write(f'{status[0]}\n{status[1]}\n{status[2]}')
 
 @bot.message_handler(commands=['heal'])
 def heal(message):
-    global hunger, mood, health
-    health = 100
-    bot.send_message(message.chat.id, f'Вы вылечили питомца! Здоровье - {health}')
-    hunger += 1
-    mood -= 1
-
+    global status
+    status[2] = 100
+    bot.send_message(message.chat.id, f'Вы вылечили питомца! Здоровье - {status[2]}')
+    status[0] += 1
+    status[1] -= 1
+    with open('Состояние.txt', 'w') as file:
+        file.write(f'{status[0]}\n{status[1]}\n{status[2]}')
 
 bot.polling(none_stop=True)
+
+
+

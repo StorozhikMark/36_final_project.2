@@ -13,7 +13,9 @@ def load_status():
         status = file.readlines()
         status1 = {}
     for i in range(0, len(status), 4):
+        status[i] = int(status[i])
         status1[status[i]] = [int(status[i+1]), int(status[i+2]), int(status[i+3])]
+    # print(status1)
     return status1
 
 status = load_status()

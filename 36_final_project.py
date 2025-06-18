@@ -28,7 +28,7 @@ chat_id = ''
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    global status
+    status = load_status()
     global chat_id
     chat_id = message.chat.id
     status[message.chat.id] = [0, 100, 100]
@@ -38,35 +38,34 @@ def start(message):
 
 @bot.message_handler(commands=['status'])
 def send_status(message):
-    global status
-    chat_id = message.chat.id
+    status = load_status()
     bot.send_message(message.chat.id, f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['feed'])
 def feed(message):
-    global status
-    chat_id = message.chat.id
+    status = load_status()
+    status[message.chat.id][0] = 0
     bot.send_message(message.chat.id, f'Вы покормили питомца! Голод - {status[message.chat.id][0]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['play'])
 def play(message):
-    global status
-    chat_id = message.chat.id
+    status = load_status()
+    status[message.chat.id][1] = 100
     bot.send_message(message.chat.id, f'Вы поиграли с питомцем! Настроение - {status[message.chat.id][1]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['heal'])
 def heal(message):
-    global status
-    chat_id = message.chat.id
+    status = load_status()
+    status[message.chat.id][2] = 100
     bot.send_message(message.chat.id, f'Вы вылечили питомца! Здоровье - {status[message.chat.id][2]}')
     save_status(status, message.chat.id)
 
 def decrease_status():
     status = load_status()
-    status[chat_id][0] = max(0, status[chat_id][0] + 5)
+    status[chat_id][0] = min(100, status[chat_id][0] + 5)
     status[chat_id][1] = max(0, status[chat_id][1] - 5)
     status[chat_id][2] = max(0, status[chat_id][2] - 5)  # Уменьшаем здоровье, но не ниже 0
     save_status(status, chat_id)

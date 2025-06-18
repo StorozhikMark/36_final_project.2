@@ -1,10 +1,14 @@
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
+import os
+import dotenv
+
+dotenv.load_dotenv()
 
 scheduler = BackgroundScheduler()
 scheduler.start()
 
-API_TOKEN = open('token.txt').readline()
+API_TOKEN = os.getenv('API_TOKEN')
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -39,28 +43,38 @@ def start(message):
 @bot.message_handler(commands=['status'])
 def send_status(message):
     status = load_status()
-    bot.send_message(message.chat.id, f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
+    if status[message.chat.id][0] == 100 or status[message.chat.id][2] == 0:
+        img = open('images/dead.jpg', 'rb')
+        bot.send_photo(message.chat.id, img, caption=f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
+    elif status[message.chat.id][0] > 50 or status[message.chat.id][1] < 50 or status[message.chat.id][2] > 50:
+        # img = open('images/sad.png', 'rb')
+        # bot.send_photo(message.chat.id, img, caption=f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
+        bot.send_message(message.chat.id, f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
+    else:
+        # img = open('images/happy.png', 'rb')
+        # bot.send_photo(message.chat.id, img, caption=f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
+        bot.send_message(message.chat.id, f'Голод - {status[message.chat.id][0]}\nНастроение - {status[message.chat.id][1]}\nЗдоровье - {status[message.chat.id][2]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['feed'])
 def feed(message):
     status = load_status()
     status[message.chat.id][0] = 0
-    bot.send_message(message.chat.id, f'Вы покормили питомца! Голод - {status[message.chat.id][0]}')
+    bot.send_message(message.chat.id, f'Ты покормил питомца! Голод - {status[message.chat.id][0]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['play'])
 def play(message):
     status = load_status()
     status[message.chat.id][1] = 100
-    bot.send_message(message.chat.id, f'Вы поиграли с питомцем! Настроение - {status[message.chat.id][1]}')
+    bot.send_message(message.chat.id, f'Ты поиграл с питомцем! Настроение - {status[message.chat.id][1]}')
     save_status(status, message.chat.id)
 
 @bot.message_handler(commands=['heal'])
 def heal(message):
     status = load_status()
     status[message.chat.id][2] = 100
-    bot.send_message(message.chat.id, f'Вы вылечили питомца! Здоровье - {status[message.chat.id][2]}')
+    bot.send_message(message.chat.id, f'Ты вылечил питомца! Здоровье - {status[message.chat.id][2]}')
     save_status(status, message.chat.id)
 
 def decrease_status():
